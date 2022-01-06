@@ -1,0 +1,6 @@
+/.terraform.*
+/.terraform/providers/registry.terraform.io
+/example.txt
+/secret.tf
+/terraform.tfstate.backup
+/manifest

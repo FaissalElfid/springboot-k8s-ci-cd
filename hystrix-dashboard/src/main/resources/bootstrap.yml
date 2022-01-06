@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    config:
+      uri: http://CLOUD-CONFIG-SERVER-SVC
+      label: main
+      profile: dev
+      fail-fast: true
+      retry:
+        max-attempts: 30
+        max-interval: 8000

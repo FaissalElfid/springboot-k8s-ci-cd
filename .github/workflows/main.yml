@@ -1,0 +1,85 @@
+name: Main workflow CI/CD (detect changes)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  pull_request_review:
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      user: ${{ steps.filter.outputs.user }}
+      department: ${{ steps.filter.outputs.department }}
+      cloud-config-server: ${{ steps.filter.outputs.cloud-config-server }}
+      cloud-gateway: ${{ steps.filter.outputs.cloud-gateway }}
+    steps:
+    # For pull requests it's not necessary to checkout the code
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          user:
+            - 'user-service/**'
+          department:
+            - 'department-service/**'
+          cloud-config-server:
+            - 'cloud-config-server/**'
+          cloud-gateway:
+            - 'cloud-gateway/**'
+  user:
+    needs: changes
+    if: ${{ needs.changes.outputs.user == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/build-java
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          working-directory: user-service
+
+  department:
+    needs: changes
+    if: ${{ needs.changes.outputs.department == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/build-java
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          working-directory: department-service
+  cloud-config-server:
+    needs: changes
+    if: ${{ needs.changes.outputs.cloud-config-server == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/build-java
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          working-directory: cloud-config-server
+  cloud-gateway:
+    needs: changes
+    if: ${{ needs.changes.outputs.cloud-gateway == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: ./.github/actions/build-java
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          working-directory: cloud-gateway
